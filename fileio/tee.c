@@ -45,35 +45,40 @@
 int
 main(int argc, char *argv[])
 {
-    int inputFd, outputFd, checkFD, openFlags, openFlagsBis;
+    int inputFd, outputFd, openFlags, openFlagsBis, opt;
     mode_t filePerms;
     ssize_t numRead;
     char buf[BUF_SIZE];
 
-    if (argc != 3 || strcmp(argv[1], "--help") == 0)
+    int optionCount = 0;
+    if (argc > 4 || strcmp(argv[1], "--help") == 0)
         usageErr("%s old-file new-file\n", argv[0]);
+    if (argc == 4 && strcmp(argv[1], "-a") == 0){
+	optionCount = 1;
+    }else if (argc == 4){
+        errExit("wrong argument name");
+    }
 
     /* Open input and output files */
 
-    inputFd = open(argv[1], O_RDONLY);
+    inputFd = open(argv[optionCount + 1], O_RDONLY);
     if (inputFd == -1)
-        errExit("opening file %s", argv[1]);
+        errExit("opening file %s", argv[optionCount + 1]);
 
     openFlags = O_CREAT | O_WRONLY | O_TRUNC;
     openFlagsBis = O_WRONLY | O_APPEND;
     filePerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
                 S_IROTH | S_IWOTH;      /* rw-rw-rw- */
-    checkFD = open(argv[2], O_RDONLY) ;
 
-    if (checkFD == -1){
-    	outputFd = open(argv[2], openFlags, filePerms);
-	printf("sdfsdfsdf");
-    }else{
-	printf("sdfaaaa");
-    	outputFd = open(argv[2], openFlagsBis, filePerms);
-        errExit("opening stricly file %s", argv[2]);
-    	if (close(checkFD) == -1)
-        	errExit("close check");
+    if (argc == 3){
+        outputFd = open(argv[2], openFlags, filePerms);
+    }
+
+    while ((opt = getopt(argc, argv, "a")) != -1) {
+	    switch(opt){
+                case 'a':
+    	            outputFd = open(argv[3], openFlagsBis, filePerms);
+	    }
     }
 
     if (outputFd == -1)
@@ -81,12 +86,13 @@ main(int argc, char *argv[])
 
     /* Transfer data until we encounter end of input or an error */
 
-    while ((numRead = read(inputFd, buf, BUF_SIZE)) > 0)
+    while ((numRead = read(inputFd, buf, BUF_SIZE)) > 0){
         if (write(outputFd, buf, numRead) != numRead){
             fatal("couldn't write whole buffer");
 	}else{
-	    printf("%s", buf);
+            printf("%s", buf);    
 	}
+    }
 
     if (numRead == -1)
         errExit("read");
