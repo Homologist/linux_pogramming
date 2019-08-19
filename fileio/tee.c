@@ -45,41 +45,31 @@
 int
 main(int argc, char *argv[])
 {
-    int inputFd, outputFd, openFlags, openFlagsBis, opt;
+    int inputFd, outputFd, openFlags,  opt;
     mode_t filePerms;
     ssize_t numRead;
     char buf[BUF_SIZE];
 
-    int optionCount = 0;
     if (argc > 4 || strcmp(argv[1], "--help") == 0)
         usageErr("%s old-file new-file\n", argv[0]);
-    if (argc == 4 && strcmp(argv[1], "-a") == 0){
-	optionCount = 1;
-    }else if (argc == 4){
-        errExit("wrong argument name");
-    }
-
-    /* Open input and output files */
-
-    inputFd = open(argv[optionCount + 1], O_RDONLY);
-    if (inputFd == -1)
-        errExit("opening file %s", argv[optionCount + 1]);
 
     openFlags = O_CREAT | O_WRONLY | O_TRUNC;
-    openFlagsBis = O_WRONLY | O_APPEND;
-    filePerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
-                S_IROTH | S_IWOTH;      /* rw-rw-rw- */
-
-    if (argc == 3){
-        outputFd = open(argv[2], openFlags, filePerms);
-    }
-
     while ((opt = getopt(argc, argv, "a")) != -1) {
 	    switch(opt){
                 case 'a':
-    	            outputFd = open(argv[3], openFlagsBis, filePerms);
+    	            openFlags = O_WRONLY | O_APPEND;
 	    }
-    }
+    }    
+    filePerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
+                S_IROTH | S_IWOTH;      /* rw-rw-rw- */
+
+    /* Open input and output files */
+
+    inputFd = open(argv[optind], O_RDONLY);
+    if (inputFd == -1)
+        errExit("opening file %s", argv[optind]);
+
+    outputFd = open(argv[optind + 1], openFlags, filePerms);
 
     if (outputFd == -1)
         errExit("opening file %s", argv[2]);
