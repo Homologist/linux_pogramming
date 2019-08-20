@@ -99,7 +99,7 @@ main(int argc, char *argv[])
     if (numRead == -1)
         errExit("read");
 
-    if (close(inputFd) == -1)
+    if (fclose(file) == -1)
         errExit("close input");
     if (close(outputFd) == -1)
         errExit("close output");
