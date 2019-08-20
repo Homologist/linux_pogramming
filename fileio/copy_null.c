@@ -83,7 +83,6 @@ main(int argc, char *argv[])
                 endOffSet++;
             }else if (endOffSet > 0){
                 lseek(outputFd, endOffSet, SEEK_CUR);
-                printf("aaaaa");
                 if (write(outputFd, &buf[i], 1) != 1){
                     errExit("write\n");
                     break;
