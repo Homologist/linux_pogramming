@@ -51,8 +51,6 @@ main(int argc, char *argv[])
         return (-1);
     }
 
-    lseek(inputFd, 0, SEEK_SET);
-
     outputFd = open(argv[2], openFlags, filePerms);
     if (outputFd == -1)
         errExit("opening file %s", argv[2]);
@@ -63,6 +61,8 @@ main(int argc, char *argv[])
         errExit("Unable to determine accurate size of file");
         return (-1);
     }
+
+    lseek(inputFd, 0, SEEK_SET);
 
     if (outputFd == -1)
         errExit("opening file %s", argv[2]);
